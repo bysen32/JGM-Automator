@@ -4,13 +4,14 @@ import cv2
 
 class UIMatcher:
     @staticmethod
-    def match(screen, target: TargetType):
+    def match(screen):
         """
         在指定快照中确定货物的屏幕位置。
         """
         # 获取对应货物的图片。
         # 有个要点：通过截屏制作货物图片时，请在快照为实际大小的模式下截屏。
-        template = cv2.imread(target.value)
+
+        template = cv2.imread('targets/train.jpg')
         # 获取货物图片的宽高。
         th, tw = template.shape[:2]
 

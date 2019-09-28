@@ -2,6 +2,8 @@ from target import TargetType
 from cv import UIMatcher
 import uiautomator2 as u2
 
+import time
+
 
 class Automator:
     def __init__(self, device: str, targets: dict):
@@ -19,6 +21,7 @@ class Automator:
             # 判断是否出现货物。
             for target in TargetType:
                 self._match_target(target)
+                break
 
             # 简单粗暴的方式，处理 “XX之光” 的荣誉显示。
             # 当然，也可以使用图像探测的模式。
@@ -51,7 +54,7 @@ class Automator:
             6: (799, 687),
             7: (304, 681),
             8: (541, 568),
-            9: (787, 447)
+            9: (787, 407)
         }
         return positions.get(key)
 
@@ -65,25 +68,30 @@ class Automator:
         """
         探测货物，并搬运货物。
         """
-        # 获取当前屏幕快照
-        screen = self.d.screenshot(format="opencv")
-
-        # 由于 OpenCV 的模板匹配有时会智障，故我们探测次数实现冗余。
-        counter = 6
-        while counter != 0:
-            counter = counter - 1
-
-            # 使用 OpenCV 探测货物。
-            result = UIMatcher.match(screen, target)
-
-            # 若无探测到，终止对该货物的探测。
-            # 实现冗余的原因：返回的货物屏幕位置与实际位置存在偏差，导致移动失效
+        cargoPos = [[660, 1640],[0.771*1080, 0.815*1920],[0.895*1080, 0.77*1920]]
+        for cargo in cargoPos:
+            screen = self.d.screenshot(format="opencv")
+            result = UIMatcher.match(screen)
             if result is None:
-                break
+                return
 
-            sx, sy = result
-            # 获取货物目的地的屏幕位置。
-            ex, ey = self._get_target_position(target)
+                # 获取当前屏幕快照
+                # 由于 OpenCV 的模板匹配有时会智障，故我们探测次数实现冗余。
 
-            # 搬运货物。
-            self.d.swipe(sx, sy, ex, ey)
+                # 使用 OpenCV 探测货物。
+
+                # 若无探测到，终止对该货物的探测。
+                # 实现冗余的原因：返回的货物屏幕位置与实际位置存在偏差，导致移动失效
+
+            for i in range(3):
+                sx, sy = cargo
+                for cnt in range(9):
+                    ex, ey = self._get_position(cnt+1)
+                    time.sleep(.3)
+                    self.d.swipe(sx, sy, ex, ey)
+                # sx, sy = result
+                # 获取货物目的地的屏幕位置。
+                # ex, ey = self._get_target_position(target)
+
+                # 搬运货物。
+                # self.d.swipe(sx, sy, ex, ey)
